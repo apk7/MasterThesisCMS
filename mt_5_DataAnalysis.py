@@ -1,3 +1,9 @@
+#=============================================================================
+# Author: Apurv Kulkarni
+#-----------------------------------------------------------------------------
+# Data analysis using scatterplot, heatmap, regression, OLS, PCC, SRCC
+#=============================================================================
+
 from utilities.mt_x_projectUtilities import *
 import pandas as pd
 import numpy as np

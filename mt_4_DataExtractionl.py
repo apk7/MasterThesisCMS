@@ -1,3 +1,9 @@
+#=============================================================================
+# Author: Apurv Kulkarni
+#-----------------------------------------------------------------------------
+# Data extraction and data cleaning of csv database extracted from results
+#=============================================================================
+
 import pandas as pd
 import numpy as np
 import sys
@@ -84,19 +90,12 @@ for i in range(start_exp_id,end_exp_id+1):
     df_nStress = pd.DataFrame(dfo['gMAS'])
     dfo['SC'] = df_pStress['maxPrincStress']/df_nStress['gMAS']
     
-    # # getting nodal displacements
-    # df = pd.read_csv(csv_destination + "node_middle.csv", index_col=False, skiprows=1, sep=',') 
-    # df = df.drop(df.columns[5:], axis=1)
-    # df.columns = ['Time','xDisp','yDisp','zDisp','resDisp']
-    # df_frames = [dfo,df[df.columns[1:]]]
-    # dfo = pd.concat(df_frames,axis=1)
-    
-    # # getting node displacement at moving head
-    # df = pd.read_csv(csv_destination + "header_disp.csv", index_col=False, skiprows=1, sep=',') 
-    # df = df.drop(df.columns[5:], axis=1)
-    # df.columns = ['Time','xDispHeader','yDisp','zDisp','resDisp']
-    # df_frames = [dfo,df[df.columns[1:]]]
-    # dfo = pd.concat(df_frames,axis=1)
+    # Get nodal displacements of moving head
+    df = pd.read_csv(csv_destination + "header_disp.csv", index_col=False, skiprows=1, sep=',') 
+    df = df.drop(df.columns[5:], axis=1)
+    df.columns = ['Time','xDispHeader','yDisp','zDisp','resDisp']
+    df_frames = [dfo,df[df.columns[1:]]]
+    dfo = pd.concat(df_frames,axis=1)
     
     # Values of elements near notch
     # Maximum value of damage activation function  and damage variables

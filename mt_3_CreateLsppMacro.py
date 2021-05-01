@@ -1,3 +1,9 @@
+#=============================================================================
+# Author: Apurv Kulkarni
+#-----------------------------------------------------------------------------
+# Creating LS-Prepost macros for data extraction
+#=============================================================================
+
 from mt_0_input_factors_all import inputfactors
 ip = inputfactors()
 import os

@@ -1,6 +1,9 @@
-##############################################################################
-# LS-PrePost Macros
-##############################################################################
+# ============================================================================
+# Author: Apurv Kulkarni
+# ----------------------------------------------------------------------------
+# Contains LS-PrePost macros used in completing thesis
+# ============================================================================
+
 import os
 def write_bash(start_id,end_id,macro_destination,lspp_loc='/home/apku868a/lsprepost4.8_common/lspp48',file_suffix='',macro_suffix=''):
     """Creates bash script containig code to run marcros using LS-PrePost application.

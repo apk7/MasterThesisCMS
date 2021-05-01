@@ -1,8 +1,11 @@
-##############################################################################
+#=============================================================================
+# Author: Apurv Kulkarni
+#-----------------------------------------------------------------------------
 # Creating jobs to be run on HPC 
 # Not required to run if analysis is done locally
 # Note: This doesn't use TUD's serverJob script
-##############################################################################
+#=============================================================================
+
 from utilities.mt_x_projectUtilities import creat_chain_sbatch, path_format_to_linux
 from mt_0_input_factors_all import inputfactors
 

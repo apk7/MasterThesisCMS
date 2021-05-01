@@ -1,4 +1,4 @@
-##############################################################################
+#=============================================================================
 # Author: Apurv Kulkarni
 #-----------------------------------------------------------------------------
 # OHT Analysis Geometry
@@ -7,7 +7,7 @@
 # api. The subsequent plies and cohesive layers are created using python loops. 
 # The cohesive elements are zero thickness elements with 8 nodes. 4-nodes from 
 # bottom and top are shared with plies respectively
-##############################################################################
+#=============================================================================
 # Geometry and Mesh controls|
 #----------------------------
 #                       <numMainbodyXElem>    <numMainbodyXElem>  
@@ -25,7 +25,7 @@
 #     ←-------clp-------→                               ←-------clp-------→
 #     ←----------------------------- Lx ----------------------------------→
 #
-##############################################################################
+#=============================================================================
 
 def create_geo(Rx=0.0024,file_dst="D:\\",filename='sample_temp',
                 onlypreview=0, save_mesh=0,meshname='mymesh',
@@ -110,9 +110,9 @@ def create_geo(Rx=0.0024,file_dst="D:\\",filename='sample_temp',
     gmsh.model.add("mymodel")
     gmsh.option.setNumber('Geometry.CopyMeshingMethod',1);
     
-    ##########################################################################
+    #=====================================================================
     #  Geometry creation
-    ##########################################################################
+    #=====================================================================
     
     # Finding intersection point of a line passing through ellipse center and 
     # ellipse
@@ -348,9 +348,9 @@ def create_geo(Rx=0.0024,file_dst="D:\\",filename='sample_temp',
                             heights=[1],recombine=True)
     gmsh.model.occ.synchronize()
     
-    ##########################################################################
+    #=====================================================================
     # Meshing
-    ##########################################################################
+    #=====================================================================
     # Mesh options
     
     gmsh.option.setNumber("Mesh.Smoothing", 100)
@@ -361,29 +361,9 @@ def create_geo(Rx=0.0024,file_dst="D:\\",filename='sample_temp',
     meshalgo2d = 8                                                              
     gmsh.option.setNumber("Mesh.Algorithm",meshalgo2d)
     
-    # 3D mesh algorithm (1: Delaunay, 3: Initial mesh only, 4: Frontal,
-    # 7: MMG3D, 9: R-tree, 10: HXT)
-    # gmsh.option.setNumber("Mesh.Algorithm3D",4)
-    
-    # 2D mesh recombination algorithm (0: simple, 1: blossom, 
-    # 2: simple full-quad, 3: blossom full-quad)
-    # gmsh.option.setNumber("Mesh.RecombinationAlgorithm",0)
-    
     # Recombine all triangular meshes? (yes:1, no:0)
     RecombineTriMesh = 1                                                        
     gmsh.option.setNumber("Mesh.RecombineAll",RecombineTriMesh)
-
-    # Subdivision algorithm (0:none 1: all quads 2: all hex)
-    # gmsh.option.setNumber("Mesh.SubdivisionAlgorithm",2)
-    
-    # 3D recombination level (0: hex, 1: hex+prisms, 2:hex+prism+pyramids 
-    # (experimental)). Default value: '0'
-    # gmsh.option.setNumber("Mesh.Recombine3DLevel",2)                          
-    
-    # gmsh.option.setNumber("Mesh.Recombine3DAll",1)
-    
-    # gmsh.option.setNumber("Mesh.MeshSizeMax",0.09);
-    
     gmsh.option.setNumber("Mesh.MeshSizeFactor",MeshSizeFactor)
     
     # Generating mesh
@@ -398,26 +378,30 @@ def create_geo(Rx=0.0024,file_dst="D:\\",filename='sample_temp',
         gmsh.write(f"{meshname}.msh")
     
     if onlypreview==0:
-        nodeTags, nodeCoords, _ = gmsh.model.mesh.getNodes()                        # get nodes and their coordinates
-        elementTypes, elementTags, elementNodeTags = gmsh.model.mesh.getElements(3) # Type,number of elements,
+        # Get nodes and their coordinates
+        nodeTags, nodeCoords, _ = gmsh.model.mesh.getNodes()                        
+        # Type,number of elements,
+        elementTypes, elementTags, elementNodeTags = gmsh.model.mesh.getElements(3)
         elementTypes = elementTypes[0]
         elementTags = elementTags[0]
         elementNodeTags = elementNodeTags[0]
     
-    # Launch the GUI to see the results:                            
-    if preview_geom_mesh:                                                       # to preview geometry and mesh using gmsh applications.
-        gmsh.fltk.run()                                                         # Script pauses untill gmsh application is closed manually
+    # Launch the GUI to to preview geometry and mesh using gmsh applications.
+    # Script pauses untill gmsh application is closed manually
+    if preview_geom_mesh:                                                       
+        gmsh.fltk.run()
     
     if log_flag:
         log = gmsh.logger.get()
         gmsh.logger.stop()
     
-    gmsh.finalize()                                                             # close gmsh
+    # close gmsh
+    gmsh.finalize()                                                             
     
     if onlypreview == 0:
-        ##########################################################################
+        #=====================================================================
         # Data Extraction: processing data collected from gmsh
-        ##########################################################################
+        #=====================================================================
         numElem = len(elementTags)
         if meshalgo2d==8 or RecombineTriMesh==1:                                    # processing based on shape of solid elements in mesh
             elemtonodes = np.reshape(elementNodeTags,(-1,8))                        # quad/hex elements -> 8 unique coordinates
@@ -435,31 +419,36 @@ def create_geo(Rx=0.0024,file_dst="D:\\",filename='sample_temp',
         print('Total number of nodes in 1st ply:\t',numNode)
         print('Mesh generation of 1st ply complete...')
         
-        ##########################################################################
+        #=====================================================================
         # Building full model
-        ##########################################################################
+        #=====================================================================
         # Add 1st layer mesh data to the database dictionary 'mesh_data'
         #---------------------------------------------------------------------
         mesh_data = {}
-        # clamp_node_set = []
         mesh_data[1]={}
         mesh_data[1]['nodeCoord'] = np.copy(node_coord)
         mesh_data[1]['elemNode'] = np.copy(elemtonodes)
         mesh_data[1]['elemidx'] = np.array(list(range(1,numElem+1))).astype('int64')
         mesh_data[1]['nodeidx'] = np.copy(nodeTags.astype('int64'))
-        assert(len(mesh_data[1]['elemNode']) == len(np.unique(mesh_data[1]['elemNode'],axis=0))) # to assert that there no duplicate elements sharing same nodes
+        
+        # To assert that there no duplicate elements sharing same nodes
+        assert(len(mesh_data[1]['elemNode']) == 
+               len(np.unique(mesh_data[1]['elemNode'],axis=0)))
         
         # Adding other layer mesh data to the database dictionary 'mesh_data'
         #---------------------------------------------------------------------
         for ply in range(2,numPly+1):
             mesh_data[ply]={}
-            new_z = mesh_data[ply-1]['nodeCoord'][:,2] + LzPly # adding thickness to all z coordinates
+            # Adding thickness to all z coordinates
+            new_z = mesh_data[ply-1]['nodeCoord'][:,2] + LzPly 
             mesh_data[ply]['nodeCoord'] = np.transpose(np.vstack([mesh_data[ply-1]['nodeCoord'][:,0],mesh_data[ply-1]['nodeCoord'][:,1],new_z]))
             mesh_data[ply]['nodeCoord'] = np.round(mesh_data[ply]['nodeCoord'],16)
             mesh_data[ply]['elemidx'] = np.arange( max(mesh_data[ply-1]['elemidx'])+1, max(mesh_data[ply-1]['elemidx'])+1+numElem )
             mesh_data[ply]['nodeidx'] = np.arange( max(mesh_data[ply-1]['nodeidx'])+1, max(mesh_data[ply-1]['nodeidx'])+1+numNode )
             mesh_data[ply]['elemNode'] = np.copy(mesh_data[ply-1]['elemNode'] + numNode)
-            assert(len(mesh_data[ply]['elemNode']) == len(np.unique(mesh_data[ply]['elemNode'],axis=0))) # to assert that there no duplicate elements sharing same nodes
+            
+            # To assert that there no duplicate elements sharing same nodes
+            assert(len(mesh_data[ply]['elemNode']) == len(np.unique(mesh_data[ply]['elemNode'],axis=0))) 
         print('Mesh generation ply complete...')   
         
         # Adding cohesive layers mesh data to the database dictionary 'mesh_data'
@@ -472,7 +461,8 @@ def create_geo(Rx=0.0024,file_dst="D:\\",filename='sample_temp',
             
             # nodes on upper surface of lower ply
             lower_nodes_lidx = np.where(mesh_data[lower_ply]['nodeCoord'][:,2] == max(mesh_data[lower_ply]['nodeCoord'][:,2]))[0]
-            lower_node_gidx = mesh_data[lower_ply]['nodeidx'][lower_nodes_lidx]     # elemetonode uses global node index. Hence converting them back
+            # Elemetonode uses global node index. Hence converting them back
+            lower_node_gidx = mesh_data[lower_ply]['nodeidx'][lower_nodes_lidx]
             LowerPlyElements_lidx = []
             
             temp1 = np.in1d(mesh_data[lower_ply]['elemNode'][:,4],lower_node_gidx)            
@@ -491,12 +481,9 @@ def create_geo(Rx=0.0024,file_dst="D:\\",filename='sample_temp',
                         nodei_lidx = np.where(mesh_data[lower_ply]['nodeidx']==nodei)[0][0] # in local idx
                         
                         # getting node with similar coordinate as "nodei" in local index            
-                        node_x = np.where(np.round(mesh_data[upper_ply]['nodeCoord'][:,0],vround)==
-                                          np.round(mesh_data[lower_ply]['nodeCoord'][nodei_lidx][0],vround))[0]
-                        node_y = node_x[np.where(np.round(mesh_data[upper_ply]['nodeCoord'][node_x,1],vround)==
-                                                  np.round(mesh_data[lower_ply]['nodeCoord'][nodei_lidx][1],vround))[0]]
-                        node_z = node_y[np.where(np.round(mesh_data[upper_ply]['nodeCoord'][node_y,2],vround)==
-                                                  np.round(mesh_data[lower_ply]['nodeCoord'][nodei_lidx,2],vround))[0]]
+                        node_x = np.where(np.round(mesh_data[upper_ply]['nodeCoord'][:,0],vround)== np.round(mesh_data[lower_ply]['nodeCoord'][nodei_lidx][0],vround))[0]
+                        node_y = node_x[np.where(np.round(mesh_data[upper_ply]['nodeCoord'][node_x,1],vround)== np.round(mesh_data[lower_ply]['nodeCoord'][nodei_lidx][1],vround))[0]]
+                        node_z = node_y[np.where(np.round(mesh_data[upper_ply]['nodeCoord'][node_y,2],vround)== np.round(mesh_data[lower_ply]['nodeCoord'][nodei_lidx,2],vround))[0]]
                         
                         # getting global indices 
                         element_gidx = mesh_data[upper_ply]['nodeidx'][node_z][0]                       
@@ -506,7 +493,7 @@ def create_geo(Rx=0.0024,file_dst="D:\\",filename='sample_temp',
                 upperply_node_gidx = np.reshape(upperply_elemnode_list,(-1,4))
                 
                 # Creating map to be used for other layers
-                node_map = np.vstack(( upperply_node_gidx[:,0] - lowerply_node_gidx[:,0],               
+                node_map = np.vstack((upperply_node_gidx[:,0] - lowerply_node_gidx[:,0],               
                                       upperply_node_gidx[:,1] - lowerply_node_gidx[:,1],
                                       upperply_node_gidx[:,2] - lowerply_node_gidx[:,2],
                                       upperply_node_gidx[:,3] - lowerply_node_gidx[:,3],
@@ -520,49 +507,56 @@ def create_geo(Rx=0.0024,file_dst="D:\\",filename='sample_temp',
             elemnode_map[layer] = new_layer_elemnode
             
             if layer == 1:
-                new_layer_elemidx = np.arange( max(mesh_data[numPly]['elemidx'])+1, 
-                                              max(mesh_data[numPly]['elemidx'])+1+len(new_layer_elemnode) )
+                new_layer_elemidx = np.arange( max(mesh_data[numPly]['elemidx'])+1, max(mesh_data[numPly]['elemidx'])+1+len(new_layer_elemnode) )
                 mesh_data[numPly+1]['elemidx'] = new_layer_elemidx
                 mesh_data[numPly+1]['elemNode'] = new_layer_elemnode
             else:
-                new_layer_elemidx = np.arange( max(mesh_data[numPly+1]['elemidx'])+1, 
-                                              max(mesh_data[numPly+1]['elemidx'])+1+len(new_layer_elemnode) )
+                new_layer_elemidx = np.arange( max(mesh_data[numPly+1]['elemidx'])+1, max(mesh_data[numPly+1]['elemidx'])+1+len(new_layer_elemnode) )
                 mesh_data[numPly+1]['elemidx'] = np.hstack((mesh_data[numPly+1]['elemidx'],new_layer_elemidx))
                 mesh_data[numPly+1]['elemNode'] = np.vstack((mesh_data[numPly+1]['elemNode'],new_layer_elemnode))
-            
-        assert(len(mesh_data[numPly+1]['elemNode']) == len(np.unique(mesh_data[numPly+1]['elemNode'],axis=0))) # to assert that there are no duplicate elements sharing same nodes
+        
+        # To ensure that there are no duplicate elements sharing same nodes
+        assert(len(mesh_data[numPly+1]['elemNode']) == len(np.unique(mesh_data[numPly+1]['elemNode'],axis=0))) 
         print('Mesh generation cohesive layer complete...')
                 
-        #######################################################################
+        #=====================================================================
         # Node Set: Creating node set for boundary conditions
-        #######################################################################
+        #=====================================================================
         node_list = {}
-        kx1 = np.where(np.round(mesh_data[numPly]['nodeCoord'][:,0],15) <= clp)[0]    # all nodes with x-coord <= 0.05
-        kz1 = np.where(np.round(mesh_data[numPly]['nodeCoord'][:,2],15) >= round(Lz,16))[0]         # all nodes with z-coord == Lz
+        # all nodes with x-coord <= 0.05
+        kx1 = np.where(np.round(mesh_data[numPly]['nodeCoord'][:,0],15) <= clp)[0]
+        # all nodes with z-coord == Lz
+        kz1 = np.where(np.round(mesh_data[numPly]['nodeCoord'][:,2],15) >= round(Lz,16))[0] 
         clamp_set_1_local_idx = np.intersect1d(kx1,kz1)
         node_list[1] = mesh_data[numPly]['nodeidx'][clamp_set_1_local_idx]
         
-        kx2 = np.where(np.round(mesh_data[1]['nodeCoord'][:,0],15) <= clp)[0]         # all nodes with x-coord <= 0.05
-        kz2 = np.where(np.round(mesh_data[1]['nodeCoord'][:,2],15) <= 0)[0]                         # all nodes with z-coord == 0
+        # all nodes with x-coord <= 0.05
+        kx2 = np.where(np.round(mesh_data[1]['nodeCoord'][:,0],15) <= clp)[0]
+        # all nodes with z-coord == 0
+        kz2 = np.where(np.round(mesh_data[1]['nodeCoord'][:,2],15) <= 0)[0]
         clamp_set_2_local_idx= np.intersect1d(kx2,kz2)
         node_list[2] = mesh_data[1]['nodeidx'][clamp_set_2_local_idx]
         
-        kx3 = np.where(np.round(mesh_data[numPly]['nodeCoord'][:,0],15) >= Lx-clp)[0] # all nodes with x-coord >= Ly-0.05
-        kz3 = np.where(np.round(mesh_data[numPly]['nodeCoord'][:,2],15) >= round(Lz,15))[0]         # all nodes with z-coord = Lz
+        # all nodes with x-coord >= Ly-0.05
+        kx3 = np.where(np.round(mesh_data[numPly]['nodeCoord'][:,0],15) >= Lx-clp)[0]
+        # all nodes with z-coord = Lz
+        kz3 = np.where(np.round(mesh_data[numPly]['nodeCoord'][:,2],15) >= round(Lz,15))[0]
         clamp_set_3_local_idx = np.intersect1d(kx3,kz3)
         node_list[3] = mesh_data[numPly]['nodeidx'][clamp_set_3_local_idx]
         
-        kx4 = np.where(np.round(mesh_data[1]['nodeCoord'][:,0],15) >= Lx-clp)[0]      # all nodes with x-coord >= Ly-0.05
-        kz4 = np.where(np.round(mesh_data[1]['nodeCoord'][:,2],15) <= 0)[0]                         # all nodes with z-coord == 0
+        # all nodes with x-coord >= Ly-0.05
+        kx4 = np.where(np.round(mesh_data[1]['nodeCoord'][:,0],15) >= Lx-clp)[0]
+        # all nodes with z-coord == 0
+        kz4 = np.where(np.round(mesh_data[1]['nodeCoord'][:,2],15) <= 0)[0]
         clamp_set_4_local_idx = np.intersect1d(kx4,kz4)
         node_list[4] = mesh_data[1]['nodeidx'][clamp_set_4_local_idx]
         
         print("Node set complete ..")
         
-        #######################################################################
+        #=====================================================================
         # LS-Dyna file generation: creating database, in the form of string, 
         # to be added in the LS-Dyna keyword file
-        #######################################################################
+        #=====================================================================
     
         node_str = '*NODE\n'
         elem_str = """*ELEMENT_SOLID

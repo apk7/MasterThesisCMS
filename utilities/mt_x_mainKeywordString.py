@@ -1,8 +1,10 @@
+# ============================================================================
 # Author: Apurv Kulkarni
+# ----------------------------------------------------------------------------
 # This file contains a function that returns main setup for simulation analysis.
 # Changes implemented here will be reflected in whole experimental setup.
 # Geometry (mesh) data is added in the end and string is returned
-
+# ============================================================================
 def mainFile(geo_data):
 	return f"""$# LS-DYNA Keyword file created by LS-PrePost(R) V4.5.7
 $# Created by Apurv Kulkarni
