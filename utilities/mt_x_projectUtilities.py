@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jan 28 14:22:42 2021
+# ============================================================================
+# Author: Apurv Kulkarni
+# ----------------------------------------------------------------------------
+# Contains all the utilities used in completing thesis
+# ============================================================================
 
-@author: apurv
-"""
 import numpy as np
 import pandas as pd
 from scipy.stats import loguniform
