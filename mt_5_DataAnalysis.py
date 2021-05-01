@@ -30,22 +30,19 @@ ip = inputfactors()
 # Project name
 project_name = ip['project_name']
 
-# loc = "D:/Academics/MasterThesisData/DataAnalysis/"
 extractedDatabse_loc = ip['extractedDatabase']
 
-extractedDatabse_loc = "D:\\Academics\\MasterThesisData\\DataAnalysis\\mainProject_all3\\output_csv\\output_dataframe\\"
-
-plot_path = "D:\\Academics\\MasterThesisData\\DataAnalysis\\AllPlots\\"
+plot_path = ip['plot_loc']
 
 # Flags to create corresponding plot type
 #-----------------------------------------------------------------------------
 
-scatterPlot     = 0     # Scatter plot flag
-heatmap         = 0     # heatmap flag
+scatterPlot     = 1     # Scatter plot flag
+heatmapFlag     = 1     # heatmap flag
 multiLinearReg  = 1     # Multiple linear regrression (OLS)
 
 # Whether to normalize the plots (for both x- and y-axes)
-normalize        = 1
+normalize       = 1
 
 # Getting extracted data
 #-----------------------------------------------------------------------------
@@ -131,7 +128,7 @@ if level == 'laminate':
     
     df_maxLoad_all_new['TimeMAS']   = df_maxLoad_all['Time']
     
-    df_maxLoad_all_new['gMAS']      = df_maxLoad_all['X-Stress']
+    df_maxLoad_all_new['gMAS']      = df_maxLoad_all['gMAS']
     df_maxLoad_all_new['gMLS']      = df_maxLoad_all['gMLS']
     df_maxLoad_all_new['gMTS']      = df_maxLoad_all['gMTS']
     df_maxLoad_all_new['gMPS']      = df_maxLoad_all['gMPS']    
@@ -141,7 +138,7 @@ if level == 'laminate':
     df_maxLoad_all_new['gIE']       = df_maxLoad_all['gIE']
 
     
-if level == 'ply' or 'both':
+if level == 'ply' or level == 'both':
     df_maxLoad_all_new['0MLS']      = df_maxLoad_all['0MLS']
     df_maxLoad_all_new['90MLS']     = df_maxLoad_all['90MLS']
     df_maxLoad_all_new['cMLS']      = df_maxLoad_all['cMLS']
@@ -189,21 +186,20 @@ if scatterPlot:
         
         print(xvar, ' vs ', i, ' complete...')
 
-if heatmap:
+if heatmapFlag:
     x_tick= xvar
-    y_tick= yVarTotal
+    y_tick= yvarMaxLoad
     total_var = [*x_tick,*y_tick]
-    heatmap(data=df_maxLoad[total_var],
+    heatmap(data  = df_maxLoad[total_var],
             x_var = x_tick,
             y_var = y_tick,
             destination=plot_path,
             filename='heatmap.png',
             compact=True,
             fig_kws={'figsize':[40,20],'dpi':150},
-            anno_kws={'size':17,'rotation':0},
+            anno_kws={'annot':True,'size':17,'rotation':0},
             cbar_kws={'label':'Correlation coefficient','label_size':30,
                       'tick_size':19},
-            label={'size':50},
             tick={'size':20,'xrotation':0},
             cmap_='viridis')
 

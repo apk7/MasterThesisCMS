@@ -19,7 +19,7 @@ def inputfactors():
     ip['analysis_type'] = 1
          
     # Main project folder name (contains all the files where database will be created)
-    project_name = 'mainProject_2'
+    project_name = 'mainProject_all4'
     ip['project_name'] = project_name
     
     # Flag for setting if the python scripts are on "local location" or on "remote location"
@@ -188,7 +188,7 @@ def inputfactors():
     ip['factor_list'] = factor_list
 
     # Total number of experiments (experiment ID: 0,1,..., max_runs-1)
-    ip['max_runs'] = 5
+    ip['max_runs'] = 210
 
     # MAximum number of iterations for generating optimum LHD matrix
     ip['lhs_iteration'] = 1000
