@@ -1,7 +1,7 @@
 ##############################################################################
 # LS-PrePost Macros
 ##############################################################################
-
+import os
 def write_bash(start_id,end_id,macro_destination,lspp_loc='/home/apku868a/lsprepost4.8_common/lspp48',file_suffix='',macro_suffix=''):
     """Creates bash script containig code to run marcros using LS-PrePost application.
     Args:
@@ -12,7 +12,6 @@ def write_bash(start_id,end_id,macro_destination,lspp_loc='/home/apku868a/lsprep
         file_suffix (str, optional): suffix of the bash script filename. Defaults to ''.
         macro_suffix (str, optional): suffix of the macro files. Defaults to ''.
     """    
-    import os
 
     # Adding preamble
     s_temp = f"{start_id}..{end_id}"
@@ -49,7 +48,36 @@ open d3plot "{file_loc}d3plot"\n"""
     s2 = "\n*macro end"
     
     return s1 + commands + s2
+
+
+def newCardFormat(macro_file,dyna_card_loc,lspp_loc):
+    save_macro = f"""*lsprepost macro command file
+*macro begin macro_post
+openc keyword "{dyna_card_loc}"
+
+elemedit createnode accept
+genselect target node
+elemedit delenode delete
+elemedit delenode accept 1
+Build Rendering data
+genselect clear
+
+save keywordabsolute 0
+save keywordbylongfmt 0
+save keywordbyi10fmt 0
+save outversion 10
+save keyword specialsubsystem "{dyna_card_loc}" 1
+*macro end
+"""
     
+    with open(macro_file,'w+') as mysave:
+        mysave.write(save_macro)
+    
+    run_cmd = f'{lspp_loc} -nographics c="{macro_file}"' + '\n'
+    
+    return run_cmd
+
+
 def global_bodyforce_100(filename,csv_destination):
     """Model is cut at plane:
     origin:  0.12 0.042 0.00093 
@@ -113,7 +141,8 @@ def global_internal_energy(filename,csv_destination):
     """    
     s = f"""gtime 2
 xyplot 1 savefile ms_csv_multiple "{csv_destination}{filename}.csv" 1 all
-    """
+
+"""
     return s
 
 

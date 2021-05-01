@@ -1,6 +1,8 @@
 ##############################################################################
+# Author: Apurv Kulkarni
+#-----------------------------------------------------------------------------
 # OHT Analysis Geometry
-# ---------------------
+#-----------------------------------------------------------------------------
 # Creating OHT geometry using gmsh api. The first layer is created using gmsh 
 # api. The subsequent plies and cohesive layers are created using python loops. 
 # The cohesive elements are zero thickness elements with 8 nodes. 4-nodes from 
@@ -25,30 +27,57 @@
 #
 ##############################################################################
 
-def create_geo(Rx=0.0024,file_dst="D:\\Academics\\MasterThesisData\\main_functions\\geometry\\",filename='sample_temp',
-                onlypreview=0, save_mesh=0,meshname='mymesh',preview_geom_mesh=0,log_flag=0,
-                numCurveElem=25, numClampXElem =4, numMainbodyXElem= 10, numCSElem = 15):
+def create_geo(Rx=0.0024,file_dst="D:\\",filename='sample_temp',
+                onlypreview=0, save_mesh=0,meshname='mymesh',
+                preview_geom_mesh=0,log_flag=0, numCurveElem=25,
+                numClampXElem =4, numMainbodyXElem= 10, numCSElem = 15):
     """
    Args:
-        Rx (float, optional): Longitudinal radius of elliptical hole. Defaults to 0.0024.
-        file_dst (str, optional): Destination path of generated geometry file. Defaults to "D:\Academics\MasterThesisData\main_functions\geometry\".
-        filename (str, optional): Filename of generated geometry file. Defaults to 'sample_temp'.
-        onlypreview (int, optional): Only previews the geometry in GMSH application no saving. Defaults to 0.
-        save_mesh (int, optional): Flag to save the mesh (different from the LS-Dyna geometry and mesh). Defaults to 0.
+        Rx (float, optional): Longitudinal radius of elliptical hole. 
+        Defaults to 0.0024.
+        
+        file_dst (str, optional): Destination path of generated geometry file. 
+        Defaults to "D:\".
+        
+        filename (str, optional): Filename of generated geometry file.
+        Defaults to 'sample_temp'.
+        
+        onlypreview (int, optional): Only previews the geometry in GMSH 
+        application no saving. Defaults to 0.
+        
+        save_mesh (int, optional): Flag to save the mesh (different from the 
+        LS-Dyna geometry and mesh). Defaults to 0.
+        
         meshname (str, optional): Mesh name. Defaults to 'mymesh'.
-        preview_geom_mesh (int, optional): Previews the gemetry (and mesh) then saves it. User needs to close preview window manually to proceed. Defaults to 0.
-        log_flag (int, optional): Whethre to generate GMSH log or not. Defaults to 0.
-        numCurveElem (int, optional): Mesh control- Number of elements on the hole circumference (in each of the 4 sectors). Defaults to 25.
-        numClampXElem (int, optional): Mesh control- Number of element on clamping area in x-direction. Defaults to 4.
-        numMainbodyXElem (int, optional): Mesh control- Number of element on mainbody area in x-direction. Defaults to 10.
-        numCSElem (int, optional): Mesh control- Number of elements in cross sectional part of notch mesh. Defaults to 15.
+        
+        preview_geom_mesh (int, optional): Previews the gemetry (and mesh) then
+        saves it. User needs to close preview window manually to proceed.
+        Defaults to 0.
+        
+        log_flag (int, optional): Whethre to generate GMSH log or not.
+        Defaults to 0.
+        
+        numCurveElem (int, optional): Mesh control- Number of elements on the 
+        hole circumference (in each of the 4 sectors). Defaults to 25.
+        
+        numClampXElem (int, optional): Mesh control- Number of element on 
+        clamping area in x-direction. Defaults to 4.
+        
+        numMainbodyXElem (int, optional): Mesh control- Number of element on 
+        mainbody area in x-direction. Defaults to 10.
+        
+        numCSElem (int, optional): Mesh control- Number of elements in cross 
+        sectional part of notch mesh. Defaults to 15.
     """    
     # Importing utilities
-    import gmsh                         # install the api using => "pip install gmsh"
+    import gmsh                # install the api using => "pip install gmsh"
     import numpy as np
     np.set_printoptions(precision=20)
     from time import process_time
-    from utilities.mt_x_mainKeywordString import mainFile
+    
+    try:from mt_x_mainKeywordString import mainFile
+    except:from utilities.mt_x_mainKeywordString import mainFile
+    
     import subprocess
     import os
     import time
@@ -56,25 +85,26 @@ def create_geo(Rx=0.0024,file_dst="D:\\Academics\\MasterThesisData\\main_functio
     start =  process_time()
     
     # Model geometry details
-    Lx = 0.240                                                                  # Length of geometry in x-direction
-    Ly = 0.0288                                                                 # Width of geometry in y-direction
-    Lz = 0.0019                                                                 # Thickness of geometry in z-direction
-    clp = 0.05                                                                  # Claming distance
-    numPly=12                                                                   # Number of composite material layers(plies) (excluding cohesive element layers)
-    LzPly = Lz/numPly                                                           # Thickness of each ply      
-    numCohElem = numPly-1                                                       # Number of cohesive element layers (numPly-1)
-    clp=0.05
-    Rx=Rx                                                                       # Radius of elliptical notch in x-direction
-    Ry=0.0024                                                                   # Radius of elliptical notch in y-direction
-    MeshSizeFactor = 1                                                          # Resulatant = MeshSize * meshSizeFactor
+    Lx = 0.240               # Length of geometry in x-direction
+    Ly = 0.0288              # Width of geometry in y-direction
+    Lz = 0.0019              # Thickness of geometry in z-direction
+    clp = 0.05               # Claming distance
+    numPly=12                # Number of composite material layers(plies)
+    LzPly = Lz/numPly        # Thickness of each ply      
+    numCohElem = numPly-1    # Number of cohesive element layers (numPly-1)
+    Rx=Rx                    # Radius of elliptical notch in x-direction
+    Ry=0.0024                # Radius of elliptical notch in y-direction
+    MeshSizeFactor = 1       # Resulatant = MeshSize * meshSizeFactor
     
-    try: os.mkdir(file_dst)
-    except: pass
+    os.makedirs(file_dst, exist_ok=True)
     
-    lspp_loc = "C:\Program Files\LSTC\LS-PrePost 4.8\lsprepost4.8_x64.exe"      # lsprepost application location (if not in path)
+    # lsprepost application location (if not in path)
+    lspp_loc = "C:\Program Files\LSTC\LS-PrePost 4.8\lsprepost4.8_x64.exe"      
     
-    gmsh.initialize()                                                           # starting gmsh
-    if log_flag:                                                                # logging gmsh geometry and mesh creation process (yes-1,no-0)
+    # starting gmsh
+    gmsh.initialize()
+    # logging gmsh geometry and mesh creation process
+    if log_flag:
         gmsh.logger.start()
     
     gmsh.model.add("mymodel")
@@ -84,7 +114,8 @@ def create_geo(Rx=0.0024,file_dst="D:\\Academics\\MasterThesisData\\main_functio
     #  Geometry creation
     ##########################################################################
     
-    # Finding intersection point of a line passing through ellipse center and ellipse
+    # Finding intersection point of a line passing through ellipse center and 
+    # ellipse
     a = Rx
     b = Ry
     if Rx>Ry:
@@ -100,9 +131,15 @@ def create_geo(Rx=0.0024,file_dst="D:\\Academics\\MasterThesisData\\main_functio
     k = Ly/2
     phi = c - k
     
-    e1x1 = ((b*b*h) - a*a*m*phi + a*b*np.sqrt((b*b) + (a*a*m*m) - (2*m*phi*h) - (phi*phi) - (m*m*h*h))) / (a*a*m*m + b*b)
+    e1x1 = (((b*b*h)-a*a*m*phi+ 
+            a*b*np.sqrt((b*b)+(a*a*m*m)-(2*m*phi*h)-(phi*phi)-(m*m*h*h)))/
+            (a*a*m*m + b*b))
+    
     e1y1 = m*e1x1 + c
-    e1x2 = ((b*b*h) - a*a*m*phi - a*b*np.sqrt(b*b + a*a*m*m - 2*m*phi*h - phi*phi - m*m*h*h)) / (a*a*m*m + b*b);
+    e1x2 = (((b*b*h) - a*a*m*phi -
+             a*b*np.sqrt(b*b + a*a*m*m - 2*m*phi*h - phi*phi - m*m*h*h))/
+            (a*a*m*m + b*b))
+    
     e1y2 = m*e1x2 + c
     
     e2x1 = 0 + (Lx/2-Ly/2)
@@ -119,25 +156,22 @@ def create_geo(Rx=0.0024,file_dst="D:\\Academics\\MasterThesisData\\main_functio
     gmsh.model.occ.addPoint(clp, Ly, 0, 1.0)        #6
     gmsh.model.occ.addPoint(Lx-clp, Ly, 0, 1.0)     #7
     gmsh.model.occ.addPoint(Lx, Ly, 0, 1.0)         #8
-        #9
-    #
-    gmsh.model.occ.addPoint(e1x2, e1y2, 0, 1.0)
-    gmsh.model.occ.addPoint(e1x1, e1y2, 0, 1.0)
-    gmsh.model.occ.addPoint(e1x1, e1y1, 0, 1.0)
-    gmsh.model.occ.addPoint(e1x2, e1y1, 0, 1.0)
-    
-    gmsh.model.occ.addPoint(e2x2, e2y2, 0, 1.0) # 14
-    gmsh.model.occ.addPoint(e2x1, e2y2, 0, 1.0) # 15
-    gmsh.model.occ.addPoint(e2x1, e2y1, 0, 1.0) # 16
-    gmsh.model.occ.addPoint(e2x2, e2y1, 0, 1.0) # 17
+    gmsh.model.occ.addPoint(e1x2, e1y2, 0, 1.0)     #9    
+    gmsh.model.occ.addPoint(e1x1, e1y2, 0, 1.0)     #10
+    gmsh.model.occ.addPoint(e1x1, e1y1, 0, 1.0)     #11
+    gmsh.model.occ.addPoint(e1x2, e1y1, 0, 1.0)     #12
+    gmsh.model.occ.addPoint(e2x2, e2y2, 0, 1.0)     #13
+    gmsh.model.occ.addPoint(e2x1, e2y2, 0, 1.0)     #14
+    gmsh.model.occ.addPoint(e2x1, e2y1, 0, 1.0)     #15
+    gmsh.model.occ.addPoint(e2x2, e2y1, 0, 1.0)     #16
     
     
     if Rx>=Ry:
-        gmsh.model.occ.addPoint(Lx/2, Ly, 0, 1.0) 
+        gmsh.model.occ.addPoint(Lx/2, Ly, 0, 1.0)   #17
     else:
-        gmsh.model.occ.addPoint(0, Ly/2, 0, 1.0) 
-        gmsh.model.occ.addPoint(clp, Ly/2, 0, 1.0) 
-        gmsh.model.occ.addPoint(e2x1, Ly/2, 0, 1.0) 
+        gmsh.model.occ.addPoint(0, Ly/2, 0, 1.0)    #18
+        gmsh.model.occ.addPoint(clp, Ly/2, 0, 1.0)  #19
+        gmsh.model.occ.addPoint(e2x1, Ly/2, 0, 1.0) #20
    
     ClampXElem = []
     MainbodyXElem = []
@@ -207,14 +241,18 @@ def create_geo(Rx=0.0024,file_dst="D:\\Academics\\MasterThesisData\\main_functio
     # Creating ellipse
     mellipse = np.pi/2
     if Rx>=Ry:
-        ellipse = gmsh.model.occ.addEllipse(Lx/2,Ly/2,0,Rx,Ry,angle1=mellipse,angle2=2*np.pi+mellipse)  
+        ellipse = gmsh.model.occ.addEllipse(Lx/2,Ly/2,0,Rx,Ry,angle1=mellipse,
+                                            angle2=2*np.pi+mellipse)  
     else:   
-        ellipse = gmsh.model.occ.addEllipse(Lx/2,Ly/2,0,Ry,Rx,angle1=mellipse,angle2=2*np.pi+mellipse)  
+        ellipse = gmsh.model.occ.addEllipse(Lx/2,Ly/2,0,Ry,Rx,angle1=mellipse,
+                                            angle2=2*np.pi+mellipse)  
         gmsh.model.occ.rotate([(1,ellipse)], Lx/2, Ly/2, 0, 0, 0, 1, np.pi/2)
     gmsh.model.occ.synchronize()
     
     # Splitting ellipse using lines across ellipse
-    cutOut = gmsh.model.occ.cut([(1,ellipse)], [(1,CSElem[0]),(1,CSElem[1]),(1,CSElem[2]),(1,CSElem[3])],removeTool=(False))
+    cutOut = gmsh.model.occ.cut([(1,ellipse)], 
+                                [(1,CSElem[0]),(1,CSElem[1]),(1,CSElem[2]),
+                                 (1,CSElem[3])],removeTool=(False))
     
     for i in range(1,len(cutOut[0])-1):
         CurveElem.append(cutOut[0][i][1])    
@@ -223,7 +261,8 @@ def create_geo(Rx=0.0024,file_dst="D:\\Academics\\MasterThesisData\\main_functio
           
     gmsh.model.occ.synchronize()
   
-    # surface groups : Grouping different lines to form closed surface boundaries   
+    # Surface groups : Grouping different lines to form closed surface 
+    # boundaries.
     sTag_list = []
     
     if Rx>=Ry:
@@ -242,6 +281,7 @@ def create_geo(Rx=0.0024,file_dst="D:\\Academics\\MasterThesisData\\main_functio
         sTag_list.append(sTag)
         gmsh.model.occ.synchronize()    
     
+    # Setting transfinite curves for structured mesh
     for i in ClampXElem:
         gmsh.model.mesh.setTransfiniteCurve(i,numClampXElem)       
         gmsh.model.occ.synchronize()
@@ -263,11 +303,13 @@ def create_geo(Rx=0.0024,file_dst="D:\\Academics\\MasterThesisData\\main_functio
         gmsh.model.mesh.setTransfiniteCurve(i,int(numCurveElem/2)) 
         gmsh.model.occ.synchronize()
     
+    # Setting tranfinite surfaces for structured mesh
     for i in sTag_list:
         gmsh.model.mesh.setTransfiniteSurface(i)
         gmsh.model.occ.synchronize()
 
-    # surface groups : Grouping different lines to form closed surface boundaries (with more than 4 points/lines) 
+    # surface groups : Grouping different lines to form closed surface 
+    # boundaries (with more than 4 points/lines) 
     if Rx>=Ry:
         lTag = gmsh.model.occ.add_wire([19,21,20,16,22,26])
         gmsh.model.occ.synchronize()    
@@ -297,34 +339,59 @@ def create_geo(Rx=0.0024,file_dst="D:\\Academics\\MasterThesisData\\main_functio
         
     gmsh.model.mesh.recombine()
     
-    # Extrude: Adding thickness to create a singly ply
-    numElemThickness = 3                                                        # number of element in thickness direction
+    # Extrude: Adding thickness to create a singly ply.
+    # Number of elements in thickness direction
+    numElemThickness = 3                                                        
     model_ = gmsh.model.getEntities(2)
     gmsh.model.occ.synchronize()
-    gmsh.model.occ.extrude(model_,0,0,LzPly,numElements=[numElemThickness],heights=[1],recombine=True)
+    gmsh.model.occ.extrude(model_,0,0,LzPly,numElements=[numElemThickness],
+                            heights=[1],recombine=True)
     gmsh.model.occ.synchronize()
     
     ##########################################################################
     # Meshing
     ##########################################################################
     # Mesh options
+    
     gmsh.option.setNumber("Mesh.Smoothing", 100)
-    meshalgo2d = 8                                                              # 2D mesh algorithm (1: MeshAdapt, 2: Automatic, 3: Initial mesh only, 5: Delaunay, 6: Frontal-Delaunay, 7: BAMG, 8: Frontal-Delaunay for Quads, 9: Packing of Parallelograms)
+    
+    # 2D mesh algorithm (1: MeshAdapt, 2: Automatic, 3: Initial mesh only, 
+    # 5: Delaunay, 6: Frontal-Delaunay, 7: BAMG, 8: Frontal-Delaunay for Quads, 
+    # 9: Packing of Parallelograms)
+    meshalgo2d = 8                                                              
     gmsh.option.setNumber("Mesh.Algorithm",meshalgo2d)
-    # gmsh.option.setNumber("Mesh.Algorithm3D",4)                               # 3D mesh algorithm (1: Delaunay, 3: Initial mesh only, 4: Frontal, 7: MMG3D, 9: R-tree, 10: HXT)
-    # gmsh.option.setNumber("Mesh.RecombinationAlgorithm",0)                    # 2D mesh recombination algorithm (0: simple, 1: blossom, 2: simple full-quad, 3: blossom full-quad)
-    RecombineTriMesh = 1                                                        # recombine all triangular meshes? (yes:1, no:0)
-    gmsh.option.setNumber("Mesh.RecombineAll",RecombineTriMesh)        
-    # gmsh.option.setNumber("Mesh.SubdivisionAlgorithm",2)                      # subdivision algorithm (0:none 1: all quads 2: all hex)
-    # gmsh.option.setNumber("Mesh.Recombine3DLevel",2)                          # 3d recombination level (0: hex, 1: hex+prisms, 2:hex+prism+pyramids) (experimental) Default value: '0'
+    
+    # 3D mesh algorithm (1: Delaunay, 3: Initial mesh only, 4: Frontal,
+    # 7: MMG3D, 9: R-tree, 10: HXT)
+    # gmsh.option.setNumber("Mesh.Algorithm3D",4)
+    
+    # 2D mesh recombination algorithm (0: simple, 1: blossom, 
+    # 2: simple full-quad, 3: blossom full-quad)
+    # gmsh.option.setNumber("Mesh.RecombinationAlgorithm",0)
+    
+    # Recombine all triangular meshes? (yes:1, no:0)
+    RecombineTriMesh = 1                                                        
+    gmsh.option.setNumber("Mesh.RecombineAll",RecombineTriMesh)
+
+    # Subdivision algorithm (0:none 1: all quads 2: all hex)
+    # gmsh.option.setNumber("Mesh.SubdivisionAlgorithm",2)
+    
+    # 3D recombination level (0: hex, 1: hex+prisms, 2:hex+prism+pyramids 
+    # (experimental)). Default value: '0'
+    # gmsh.option.setNumber("Mesh.Recombine3DLevel",2)                          
+    
     # gmsh.option.setNumber("Mesh.Recombine3DAll",1)
+    
     # gmsh.option.setNumber("Mesh.MeshSizeMax",0.09);
+    
     gmsh.option.setNumber("Mesh.MeshSizeFactor",MeshSizeFactor)
     
     # Generating mesh
     gmsh.model.mesh.clear()
-    gmsh.model.mesh.generate(2)                                                 # Meshing 2D
-    gmsh.model.mesh.generate(3)                                                 # Meshing 3D
+    # Meshing 2D
+    gmsh.model.mesh.generate(2)
+    # Meshing 3D
+    gmsh.model.mesh.generate(3)
     
     # gmsh mesh name without extension # save mesh (yes-1,no-0)
     if save_mesh: 
@@ -466,9 +533,9 @@ def create_geo(Rx=0.0024,file_dst="D:\\Academics\\MasterThesisData\\main_functio
         assert(len(mesh_data[numPly+1]['elemNode']) == len(np.unique(mesh_data[numPly+1]['elemNode'],axis=0))) # to assert that there are no duplicate elements sharing same nodes
         print('Mesh generation cohesive layer complete...')
                 
-        ##########################################################################
+        #######################################################################
         # Node Set: Creating node set for boundary conditions
-        ##########################################################################
+        #######################################################################
         node_list = {}
         kx1 = np.where(np.round(mesh_data[numPly]['nodeCoord'][:,0],15) <= clp)[0]    # all nodes with x-coord <= 0.05
         kz1 = np.where(np.round(mesh_data[numPly]['nodeCoord'][:,2],15) >= round(Lz,16))[0]         # all nodes with z-coord == Lz
@@ -492,10 +559,10 @@ def create_geo(Rx=0.0024,file_dst="D:\\Academics\\MasterThesisData\\main_functio
         
         print("Node set complete ..")
         
-        ##########################################################################
-        # LS-Dyna file generation: creating database, in the form of string, to be
-        # added in the LS-Dyna keyword file
-        ##########################################################################
+        #######################################################################
+        # LS-Dyna file generation: creating database, in the form of string, 
+        # to be added in the LS-Dyna keyword file
+        #######################################################################
     
         node_str = '*NODE\n'
         elem_str = """*ELEMENT_SOLID
@@ -504,8 +571,10 @@ def create_geo(Rx=0.0024,file_dst="D:\\Academics\\MasterThesisData\\main_functio
         for ply in range(1,numEntities+1):
             # Node data
             if ply != numPly+1:
-                node_data = np.hstack((np.reshape(mesh_data[ply]['nodeidx'],(-1,1)),mesh_data[ply]['nodeCoord']))
-                node_str += '\n'.join(', '.join(str(cell) for cell in row) for row in node_data)
+                node_data = np.hstack((np.reshape(mesh_data[ply]['nodeidx'],(-1,1)),
+                                       mesh_data[ply]['nodeCoord']))
+                node_str += '\n'.join(', '.join(str(cell) for cell in row) 
+                                      for row in node_data)
                 node_str += '\n'
                 
             # solid elements
@@ -514,7 +583,8 @@ def create_geo(Rx=0.0024,file_dst="D:\\Academics\\MasterThesisData\\main_functio
             node_coord =  mesh_data[ply]['elemNode']
             elem_data = np.hstack((elem_id,part_id,node_coord))
             elem_data.astype('int64')
-            elem_str += '\n'.join(', '.join(str(int(cell)) for cell in row) for row in elem_data)
+            elem_str += '\n'.join(', '.join(str(int(cell)) for cell in row) 
+                                  for row in elem_data)
             elem_str += "\n"
             
         # Node set 
@@ -535,15 +605,17 @@ def create_geo(Rx=0.0024,file_dst="D:\\Academics\\MasterThesisData\\main_functio
             
         geo_str = node_str + '$#\n' + elem_str + '$#\n' + node_list_str_all
         
-        # adding generated string to the LS-Dyna keyword files and getting final string
+        # Adding generated string to the LS-Dyna keyword files and getting 
+        # final string
         main_str = mainFile(geo_str)            # *END inserted here
         
         print("String generation complete...")    
-        ##########################################################################
+        
+        # Writing LS-Dyna keyword file
         with open(f'{file_dst}{filename}.k','w+') as mygeo:        
             mygeo.write(main_str)
         print("Writing file complete...")    
-        ##########################################################################
+        
         # creating macro for keyword style conversion to new keyword style
         geo_macro_str = f"""*lsprepost macro command file
 *macro begin macro_post
@@ -572,22 +644,22 @@ save keyword specialsubsystem "{file_dst}{filename}.k" 1
         
         # Converting the old keyword style to new keyword style using lsprepost
         print("Saving newly fomatted keyword to location: ",file_dst)
-        lspp_cmd = f'"{lspp_loc}" -nographics c="{file_dst}{macro_filename}.cfile"'
+        cmd=f'"{lspp_loc}" -nographics c="{file_dst}{macro_filename}.cfile"'
         
-        subprocess.Popen(f'{lspp_cmd}', shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        # out, err = proc.communicate()
+        subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, 
+                         stdout=subprocess.PIPE)
         
         time.sleep(20) 
     print('elapsed time', process_time() - start)
 
 #%% Example
-# loc = "D:\\Academics\\MasterThesisData\\DataAnalysis\\mainProject_meshConvergenceStudy\\geometry\\"
+# loc = "D:\\Academics\\MasterThesisData\\DataAnalysis\\"
 # create_geo(Rx              = 0.0024,
-#            filename        = 'geo',
-#            file_dst        = loc,
-#            numCurveElem    = 35,
-#            numClampXElem   = 4,
-#            numMainbodyXElem= 12,
-#            numCSElem       = 20,
-#            )
+#             filename        = 'geo',
+#             file_dst        = loc,
+#             numCurveElem    = 10,#35,
+#             numClampXElem   = 1,#4,
+#             numMainbodyXElem= 5,#12,
+#             numCSElem       = 10,#20,
+#             )
 
