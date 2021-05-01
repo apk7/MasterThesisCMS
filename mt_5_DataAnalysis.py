@@ -44,10 +44,6 @@ scatterPlot     = 0     # Scatter plot flag
 heatmap         = 0     # heatmap flag
 multiLinearReg  = 1     # Multiple linear regrression (OLS)
 
-
-# heatmap for only design variables
-onlyInput_heatmap   = 0
-
 # Whether to normalize the plots (for both x- and y-axes)
 normalize        = 1
 
