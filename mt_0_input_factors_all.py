@@ -16,10 +16,10 @@ def inputfactors():
     # 1 : Material parameters as the only design variable
     # 2 : Notch geometry as the only design variable
     # 3 : Material parameter and Notch geometry as the only design variable
-    ip['analysis_type'] = 1
+    ip['analysis_type'] = 3
          
     # Main project folder name (contains all the files where database will be created)
-    project_name = 'mainProject_all4'
+    project_name = 'project_xyz'
     ip['project_name'] = project_name
     
     # Flag for setting if the python scripts are on "local location" or on "remote location"
@@ -110,9 +110,9 @@ def inputfactors():
     #             these discrete values assigned in random order.
     # ========================================================================
     
-    variation1 = 80#20 #10
-    variation2 = 80#40 #15
-    variation3 = 80 #40
+    variation1 = 20
+    variation2 = 40
+    variation3 = 80
     
     factor_list = {
         # Pinho material model
@@ -132,7 +132,7 @@ def inputfactors():
         # Shear modulus bc                
         'gbc' :{'type':11, 'value': 2.92e+9, 'vari':variation1},                
         # Maximum effective strain for element layer failure
-        'efs' :{'type':21, 'value': 'nan',   'min_val':-0.4, 'max_val':-0.1},
+        'efs' :{'type':21, 'min_val':-0.4, 'max_val':-0.1},
         # Poisson's ratio in ba
         'pba' :{'type':11, 'value': 0.015,   'vari':variation1},                
         # Poisson's ratio in ca
@@ -140,7 +140,7 @@ def inputfactors():
         # Poisson's ratio in cb
         'pcb' :{'type':11, 'value': 0.37,    'vari':variation1},
         # Misalignment angle
-        'mang':{'type':21, 'value': 'nan',   'min_val':0, 'max_val': 10},
+        'mang':{'type':21, 'min_val':0, 'max_val': 10},
         # Fracture toughness for longitudinal (fiber) compressive failure mode.
         'enk' :{'type':11, 'value': 4e+7,    'vari':variation3},
         # Fracture toughness for longitudinal (fiber) tensile failure mode.
@@ -164,7 +164,7 @@ def inputfactors():
         # In-plane shear yield stress
         'sig' :{'type':11, 'value': 0.75e+6, 'vari':variation2},
         # Fracture angle in pure transverse compression
-        'fio' :{'type':21, 'value': 'nan',   'min_val':50, 'max_val': 56},
+        'fio' :{'type':21, 'min_val':51, 'max_val': 55},
     
         # Cohesive material parameters
         #---------------------------------------------------------------------
@@ -175,9 +175,9 @@ def inputfactors():
         # Fracture toughness / energy release rate   for mode II.
         'gii' :{'type':11, 'value': 800,     'vari':variation3},
         # peak traction in normal direction mode
-        't'   :{'type':21, 'value': 'nan', 'min_val':2.780E+07, 'max_val':6.520E+07},
+        't'   :{'type':21, 'min_val':0.37E+08, 'max_val':4.37E+08},
         # Peak traction in tangential direction (mode II).
-        's'   :{'type':21, 'value': 'nan', 'min_val':0.37E+08, 'max_val':4.37E+08},
+        's'   :{'type':21, 'min_val':0.37E+08, 'max_val':4.37E+08},
         
         # Geometry parameters
         #---------------------------------------------------------------------

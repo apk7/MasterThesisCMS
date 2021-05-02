@@ -26,8 +26,8 @@ job_submition_type = 1
 numCPU          = 30
 numNodes        = 2
 simTime         = '04:00:00'
-account_name    = 'p_fkv_laser'
-user_email      = 'apurv.kulkarni@mailbox.tu-dresden.de'
+account_name    = 'HPC_PROJECT_NAME'
+user_email      = 'xyz@abs.com'
 
 if job_submition_type==0:
     

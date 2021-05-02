@@ -222,10 +222,21 @@ $#"""
     return card_data
 
 
+def format_val_i(val):
+        if len(str(val)) > 10:
+            if val < 0: 
+                fval = str(format(val,'6.3E'))
+            else:
+                fval = str(format(val,'6.4E'))
+        else:
+            fval = ' '*(10 - len(str(val))) + str(val)
+
+        return fval
+
 def dyna_output_curve(lcid=7, sfa=1, sfo=1,plot = []):
-    lcid = format_val(lcid)
-    sfa  = format_val(sfa)
-    sfo  = format_val(sfo)
+    lcid = format_val_i(lcid)
+    sfa  = format_val_i(sfa)
+    sfo  = format_val_i(sfo)
     curve =f"""$#
 *DEFINE_CURVE_TITLE
 Force
@@ -235,8 +246,8 @@ $#                a1                  o1
 """
     for coord in plot:
         #print("ip- ",coord[0],coord[1])
-        f_x = format_val(coord[0])
-        f_y = format_val(coord[1])
+        f_x = format_val_i(coord[0])
+        f_y = format_val_i(coord[1])
         #print(f_x,f_y)
         plotval = " "*10 + f_x + " "*10 + f_y + "\n"
         #print(plotval)
