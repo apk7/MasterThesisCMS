@@ -198,7 +198,7 @@ if heatmapFlag:
             compact=True,
             fig_kws={'figsize':[40,20],'dpi':150},
             anno_kws={'annot':True,'size':17,'rotation':0},
-            cbar_kws={'label':'Correlation coefficient','label_size':30,
+            cbar_kws={'label':'Pearsons correlation coefficient','label_size':30,
                       'tick_size':19},
             tick={'size':20,'xrotation':0},
             cmap_='viridis')
