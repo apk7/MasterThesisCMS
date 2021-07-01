@@ -35,7 +35,9 @@ Repository for all the code used in completing master thesis:
 ```
 
 ## Thesis details
+
 ![d1](./project_documentation/d1.png)
+
 * The description of the thesis can be found in:
     * [./project_documentation/MasterThesis_Defense_Presentation](./project_documentation/MasterThesis_Defense_Presentation.pptx)
     * [./project_documentation/MasterThesis_Report](./project_documentation/MasterThesis_Report.pdf)
