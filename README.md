@@ -44,11 +44,11 @@ Repository for all the code used in completing master thesis:
 
 ##  Workflow
 
-![d1](./project_documentation/d2.png)
-![d1](./project_documentation/d3.png)
-![d1](./project_documentation/d4.png)
-![d1](./project_documentation/d5.png)
-![d1](./project_documentation/d6.png)
+![d2](./project_documentation/d2.png)
+![d3](./project_documentation/d3.png)
+![d4](./project_documentation/d4.png)
+![d5](./project_documentation/d5.png)
+![d6](./project_documentation/d6.png)
 
 
 
